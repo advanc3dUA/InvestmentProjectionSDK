@@ -25,6 +25,36 @@ Investment projection is useful for both users and products.
 - English and German localization
 - Unit-tested calculation and UI state logic
 
+## Preview
+
+<p align="center">
+  Interactive SDK flow
+</p>
+
+<p align="center">
+  <img src=".github/assets/Demonstration.gif" alt="Interactive SDK demo" width="280" />
+</p>
+
+<p align="center">
+  English, dark appearance
+</p>
+
+<p align="center">
+  <img src=".github/assets/English-1.png" alt="English host app screen" width="280" />
+  &nbsp;
+  <img src=".github/assets/English-2.png" alt="English SDK screen" width="280" />
+</p>
+
+<p align="center">
+  German, light appearance
+</p>
+
+<p align="center">
+  <img src=".github/assets/German-1.png" alt="German host app screen" width="280" />
+  &nbsp;
+  <img src=".github/assets/German-2.png" alt="German SDK screen" width="280" />
+</p>
+
 ## Package Structure
 
 The package ships with two public libraries:
