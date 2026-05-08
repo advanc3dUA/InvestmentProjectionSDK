@@ -3,6 +3,7 @@ import InvestmentProjectionCore
 
 struct InvestmentProjectionViewState {
     let formInput: ProjectionFormInput
+    let annualRateOptions: [AnnualRateOption]
     let result: ProjectionResultViewState?
     let validationMessage: String?
 
@@ -23,6 +24,11 @@ struct ProjectionFormInput: Equatable {
 enum AnnualRateSelection: Equatable {
     case preset(Decimal)
     case custom
+}
+
+struct AnnualRateOption: Equatable {
+    let rate: Decimal
+    let title: String
 }
 
 struct ProjectionResultViewState {

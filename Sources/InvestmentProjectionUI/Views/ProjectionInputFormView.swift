@@ -6,6 +6,7 @@ final class ProjectionInputFormView: UIStackView {
 
     private let theme: InvestmentProjectionTheme
     private let localization: ProjectionLocalization
+    private var annualRateOptions: [AnnualRateOption] = []
     private let balanceField = UITextField()
     private let contributionField = UITextField()
     private let yearsField = UITextField()
@@ -22,12 +23,7 @@ final class ProjectionInputFormView: UIStackView {
             localization.monthlyTitle,
             localization.yearlyTitle
         ])
-        self.ratePresetControl = UISegmentedControl(items: [
-            "2.5%",
-            "5%",
-            "10%",
-            localization.customTitle
-        ])
+        self.ratePresetControl = UISegmentedControl()
         super.init(frame: .zero)
         configureView()
     }
@@ -39,12 +35,7 @@ final class ProjectionInputFormView: UIStackView {
             self.localization.monthlyTitle,
             self.localization.yearlyTitle
         ])
-        self.ratePresetControl = UISegmentedControl(items: [
-            "2.5%",
-            "5%",
-            "10%",
-            self.localization.customTitle
-        ])
+        self.ratePresetControl = UISegmentedControl()
         super.init(coder: coder)
         configureView()
     }
@@ -54,6 +45,7 @@ final class ProjectionInputFormView: UIStackView {
         defer { isApplyingState = false }
 
         let formInput = state.formInput
+        applyAnnualRateOptions(state.annualRateOptions)
         balanceField.text = formInput.currentBalanceText
         contributionField.text = formInput.contributionAmountText
         contributionFrequencyControl.selectedSegmentIndex = formInput.contributionFrequency == .monthly ? 0 : 1
@@ -136,7 +128,7 @@ final class ProjectionInputFormView: UIStackView {
             return
         }
 
-        customRateField.isHidden = ratePresetControl.selectedSegmentIndex != 3
+        customRateField.isHidden = rateSelection() != .custom
         onChange?(currentFormInput())
     }
 
@@ -152,28 +144,35 @@ final class ProjectionInputFormView: UIStackView {
     }
 
     private func rateSelection() -> AnnualRateSelection {
-        switch ratePresetControl.selectedSegmentIndex {
-        case 0:
-            .preset(2.5)
-        case 1:
-            .preset(5)
-        case 2:
-            .preset(10)
-        default:
-            .custom
+        let selectedIndex = ratePresetControl.selectedSegmentIndex
+        guard annualRateOptions.indices.contains(selectedIndex) else {
+            return .custom
         }
+
+        return .preset(annualRateOptions[selectedIndex].rate)
     }
 
     private func segmentIndex(for selection: AnnualRateSelection) -> Int {
         switch selection {
-        case .preset(2.5):
-            0
-        case .preset(5):
-            1
-        case .preset(10):
-            2
-        case .preset, .custom:
-            3
+        case let .preset(rate):
+            annualRateOptions.firstIndex { $0.rate == rate } ?? annualRateOptions.count
+        case .custom:
+            annualRateOptions.count
         }
+    }
+
+    private func applyAnnualRateOptions(_ options: [AnnualRateOption]) {
+        guard annualRateOptions != options else {
+            return
+        }
+
+        annualRateOptions = options
+        ratePresetControl.removeAllSegments()
+
+        for (index, option) in options.enumerated() {
+            ratePresetControl.insertSegment(withTitle: option.title, at: index, animated: false)
+        }
+
+        ratePresetControl.insertSegment(withTitle: localization.customTitle, at: options.count, animated: false)
     }
 }

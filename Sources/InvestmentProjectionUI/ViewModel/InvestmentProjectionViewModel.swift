@@ -36,6 +36,7 @@ final class InvestmentProjectionViewModel {
 
             return InvestmentProjectionViewState(
                 formInput: formInput,
+                annualRateOptions: annualRateOptions(),
                 result: ProjectionResultViewState(
                     finalBalanceText: formatter.currencyString(from: result.finalBalance),
                     totalContributionsText: formatter.currencyString(from: result.totalContributions),
@@ -47,6 +48,7 @@ final class InvestmentProjectionViewModel {
         } catch {
             return InvestmentProjectionViewState(
                 formInput: formInput,
+                annualRateOptions: annualRateOptions(),
                 result: nil,
                 validationMessage: message(for: error)
             )
@@ -85,16 +87,7 @@ final class InvestmentProjectionViewModel {
     }
 
     private func rateSelection(for annualRate: Decimal) -> AnnualRateSelection {
-        switch annualRate {
-        case 2.5:
-            .preset(2.5)
-        case 5:
-            .preset(5)
-        case 10:
-            .preset(10)
-        default:
-            .custom
-        }
+        configuration.annualRatePresets.contains(annualRate) ? .preset(annualRate) : .custom
     }
 
     private func annualRate(from formInput: ProjectionFormInput) -> Decimal? {
@@ -128,6 +121,12 @@ final class InvestmentProjectionViewModel {
             )
         case let .invalidConfiguration(message):
             return message
+        }
+    }
+
+    private func annualRateOptions() -> [AnnualRateOption] {
+        configuration.annualRatePresets.map {
+            AnnualRateOption(rate: $0, title: "\(formatter.decimalString(from: $0))%")
         }
     }
 }

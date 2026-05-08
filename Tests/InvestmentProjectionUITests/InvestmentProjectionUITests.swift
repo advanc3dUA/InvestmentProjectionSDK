@@ -33,4 +33,48 @@ struct InvestmentProjectionUITests {
 
         #expect(state.validationMessage == "Jahre müssen zwischen 1 und 50 liegen.")
     }
+
+    @Test func viewModelExposesAnnualRateOptionsFromConfiguration() {
+        let configuration = ProjectionConfiguration(annualRatePresets: [3, 7, 11])
+        let viewModel = InvestmentProjectionViewModel(
+            initialInput: ProjectionInput(
+                currentBalance: 0,
+                contributionAmount: 100,
+                contributionFrequency: .monthly,
+                investmentYears: 5,
+                annualRate: 7
+            ),
+            configuration: configuration,
+            calculator: ProjectionCalculator(),
+            localization: ProjectionLocalization(locale: Locale(identifier: "en_US"))
+        )
+
+        let state = viewModel.initialState()
+
+        #expect(state.annualRateOptions.map(\.rate) == [3, 7, 11])
+        #expect(state.annualRateOptions.map(\.title) == ["3%", "7%", "11%"])
+        #expect(state.formInput.annualRateSelection == .preset(7))
+    }
+
+    @Test func viewModelTreatsNonPresetAnnualRateAsCustom() {
+        let configuration = ProjectionConfiguration(annualRatePresets: [3, 7])
+        let viewModel = InvestmentProjectionViewModel(
+            initialInput: ProjectionInput(
+                currentBalance: 0,
+                contributionAmount: 100,
+                contributionFrequency: .monthly,
+                investmentYears: 5,
+                annualRate: 9.5
+            ),
+            configuration: configuration,
+            calculator: ProjectionCalculator(),
+            localization: ProjectionLocalization(locale: Locale(identifier: "en_US"))
+        )
+
+        let state = viewModel.initialState()
+
+        #expect(state.annualRateOptions.map(\.rate) == [3, 7])
+        #expect(state.formInput.annualRateSelection == .custom)
+        #expect(state.formInput.customAnnualRateText == "9.5")
+    }
 }
