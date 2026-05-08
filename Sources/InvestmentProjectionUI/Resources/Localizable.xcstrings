@@ -35,23 +35,6 @@
         }
       }
     },
-    "projection.headline.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szenarioplanung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scenario planning"
-          }
-        }
-      }
-    },
     "projection.headline.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -133,6 +116,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Custom rate"
+          }
+        }
+      }
+    },
+    "projection.input.custom_years" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigener Zeitraum"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom years"
           }
         }
       }
@@ -252,6 +252,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Projected value"
+          }
+        }
+      }
+    },
+    "projection.result.selected_year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jahr %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year %@"
           }
         }
       }

@@ -7,18 +7,21 @@ final class InvestmentProjectionViewModel {
     private let formatter: ProjectionValueFormatter
     private let localization: ProjectionLocalization
     private let initialInput: ProjectionInput?
+    private let baseCalendarYear: Int
 
     init(
         initialInput: ProjectionInput?,
         configuration: ProjectionConfiguration,
         calculator: ProjectionCalculator,
         localization: ProjectionLocalization,
+        baseCalendarYear: Int = Calendar.current.component(.year, from: Date()),
         formatter: ProjectionValueFormatter? = nil
     ) {
         self.initialInput = initialInput
         self.configuration = configuration
         self.calculator = calculator
         self.localization = localization
+        self.baseCalendarYear = baseCalendarYear
         self.formatter = formatter ?? ProjectionValueFormatter(
             locale: localization.locale,
             currencyCode: localization.currencyCode
@@ -36,18 +39,22 @@ final class InvestmentProjectionViewModel {
 
             return InvestmentProjectionViewState(
                 formInput: formInput,
+                investmentYearOptions: investmentYearOptions(),
                 annualRateOptions: annualRateOptions(),
                 result: ProjectionResultViewState(
                     finalBalanceText: formatter.currencyString(from: result.finalBalance),
                     totalContributionsText: formatter.currencyString(from: result.totalContributions),
                     totalGrowthText: formatter.currencyString(from: result.totalGrowth),
-                    chartPoints: result.yearlyProjection
+                    chartPoints: result.yearlyProjection,
+                    baseCalendarYear: baseCalendarYear,
+                    selectedYearText: "\(baseCalendarYear + (result.yearlyProjection.last?.year ?? input.investmentYears))"
                 ),
                 validationMessage: nil
             )
         } catch {
             return InvestmentProjectionViewState(
                 formInput: formInput,
+                investmentYearOptions: investmentYearOptions(),
                 annualRateOptions: annualRateOptions(),
                 result: nil,
                 validationMessage: message(for: error)
@@ -69,7 +76,8 @@ final class InvestmentProjectionViewModel {
             currentBalanceText: formatter.decimalString(from: input.currentBalance),
             contributionAmountText: formatter.decimalString(from: input.contributionAmount),
             contributionFrequency: input.contributionFrequency,
-            investmentYearsText: "\(input.investmentYears)",
+            investmentYearsSelection: yearsSelection(for: input.investmentYears),
+            customInvestmentYearsText: "\(input.investmentYears)",
             annualRateSelection: rateSelection(for: annualRate),
             customAnnualRateText: formatter.decimalString(from: annualRate)
         )
@@ -80,10 +88,14 @@ final class InvestmentProjectionViewModel {
             currentBalance: formatter.decimal(from: formInput.currentBalanceText) ?? 0,
             contributionAmount: formatter.decimal(from: formInput.contributionAmountText) ?? 0,
             contributionFrequency: formInput.contributionFrequency,
-            investmentYears: Int(formInput.investmentYearsText) ?? 0,
+            investmentYears: investmentYears(from: formInput),
             annualRate: annualRate(from: formInput),
             compoundingFrequency: nil
         )
+    }
+
+    private func yearsSelection(for investmentYears: Int) -> InvestmentYearsSelection {
+        configuration.investmentYearPresets.contains(investmentYears) ? .preset(investmentYears) : .custom
     }
 
     private func rateSelection(for annualRate: Decimal) -> AnnualRateSelection {
@@ -96,6 +108,15 @@ final class InvestmentProjectionViewModel {
             rate
         case .custom:
             formatter.decimal(from: formInput.customAnnualRateText)
+        }
+    }
+
+    private func investmentYears(from formInput: ProjectionFormInput) -> Int {
+        switch formInput.investmentYearsSelection {
+        case let .preset(years):
+            years
+        case .custom:
+            Int(formInput.customInvestmentYearsText) ?? 0
         }
     }
 
@@ -127,6 +148,12 @@ final class InvestmentProjectionViewModel {
     private func annualRateOptions() -> [AnnualRateOption] {
         configuration.annualRatePresets.map {
             AnnualRateOption(rate: $0, title: "\(formatter.decimalString(from: $0))%")
+        }
+    }
+
+    private func investmentYearOptions() -> [InvestmentYearOption] {
+        configuration.investmentYearPresets.map {
+            InvestmentYearOption(years: $0, title: "\($0)")
         }
     }
 }

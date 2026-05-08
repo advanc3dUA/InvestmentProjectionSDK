@@ -2,7 +2,7 @@ import InvestmentProjectionCore
 import Foundation
 import UIKit
 
-public final class InvestmentProjectionViewController: UIViewController {
+public final class InvestmentProjectionViewController: UIViewController, UIGestureRecognizerDelegate {
     private let theme: InvestmentProjectionTheme
     private let localization: ProjectionLocalization
     private let viewModel: InvestmentProjectionViewModel
@@ -45,18 +45,26 @@ public final class InvestmentProjectionViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         title = localization.navigationTitle
-        view.backgroundColor = theme.backgroundColor
         configureLayout()
+        configureKeyboardDismissal()
+        configureTraitChanges()
         bindViews()
+        applyAppearance()
         render(viewModel.initialState())
+    }
+
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        applyAppearance()
     }
 
     private func configureLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.keyboardDismissMode = .interactive
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.axis = .vertical
-        contentStack.spacing = 16
-        contentStack.layoutMargins = UIEdgeInsets(top: 24, left: 20, bottom: 32, right: 20)
+        contentStack.spacing = theme.contentSpacing
+        contentStack.layoutMargins = theme.contentInsets
         contentStack.isLayoutMarginsRelativeArrangement = true
 
         view.addSubview(scrollView)
@@ -97,7 +105,6 @@ public final class InvestmentProjectionViewController: UIViewController {
     private func makeHeaderView() -> UIView {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 8
 
         let titleLabel = UILabel()
         titleLabel.text = localization.headlineTitle
@@ -106,13 +113,68 @@ public final class InvestmentProjectionViewController: UIViewController {
         titleLabel.textColor = theme.primaryTextColor
         titleLabel.numberOfLines = 0
 
-        let subtitleLabel = UILabel()
-        subtitleLabel.text = localization.headlineSubtitle
-        subtitleLabel.font = .preferredFont(forTextStyle: .subheadline)
-        subtitleLabel.textColor = theme.secondaryTextColor
-
         stack.addArrangedSubview(titleLabel)
-        stack.addArrangedSubview(subtitleLabel)
         return stack
+    }
+
+    private func configureKeyboardDismissal() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.delegate = self
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    private func configureTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
+            self.applyAppearance()
+        }
+    }
+
+    private func applyAppearance() {
+        view.backgroundColor = theme.backgroundColor
+        configureNavigationBar()
+        inputFormView.updateAppearance()
+        resultSummaryView.updateAppearance()
+    }
+
+    private func configureNavigationBar() {
+        guard let navigationBar = navigationController?.navigationBar else {
+            return
+        }
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = theme.backgroundColor
+        appearance.titleTextAttributes = [.foregroundColor: theme.primaryTextColor]
+        appearance.largeTitleTextAttributes = [.foregroundColor: theme.primaryTextColor]
+
+        navigationBar.standardAppearance = appearance
+        navigationBar.scrollEdgeAppearance = appearance
+        navigationBar.compactAppearance = appearance
+        navigationBar.tintColor = theme.accentColor
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        !touch.isInsideControl
+    }
+}
+
+private extension UITouch {
+    var isInsideControl: Bool {
+        var currentView = view
+
+        while let inspectedView = currentView {
+            if inspectedView is UIControl {
+                return true
+            }
+
+            currentView = inspectedView.superview
+        }
+
+        return false
     }
 }

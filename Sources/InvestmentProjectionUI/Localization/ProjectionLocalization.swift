@@ -6,17 +6,18 @@ struct ProjectionLocalization {
 
     var navigationTitle: String { string("projection.navigation.title") }
     var headlineTitle: String { string("projection.headline.title") }
-    var headlineSubtitle: String { string("projection.headline.subtitle") }
     var currentBalanceTitle: String { string("projection.input.current_balance") }
     var contributionTitle: String { string("projection.input.contribution") }
     var frequencyTitle: String { string("projection.input.frequency") }
     var yearsTitle: String { string("projection.input.years") }
+    var customYearsTitle: String { string("projection.input.custom_years") }
     var annualRateTitle: String { string("projection.input.annual_rate") }
     var customRateTitle: String { string("projection.input.custom_rate") }
     var monthlyTitle: String { string("projection.frequency.monthly") }
     var yearlyTitle: String { string("projection.frequency.yearly") }
     var customTitle: String { string("projection.rate.custom") }
     var projectedValueTitle: String { string("projection.result.projected_value") }
+    var selectedYearTitle: String { string("projection.result.selected_year") }
     var contributedTitle: String { string("projection.result.contributed") }
     var growthTitle: String { string("projection.result.growth") }
     var calculationFallbackMessage: String { string("projection.validation.calculation_failed") }
@@ -44,6 +45,10 @@ struct ProjectionLocalization {
             formattedDecimal(lowerBound),
             formattedDecimal(upperBound)
         )
+    }
+
+    func selectedYearMessage(_ year: Int) -> String {
+        String(format: selectedYearTitle, locale: locale, "\(year)")
     }
 
     private func string(_ key: String) -> String {
