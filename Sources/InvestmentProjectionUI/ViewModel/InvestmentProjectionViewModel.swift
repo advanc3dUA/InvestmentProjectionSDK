@@ -5,18 +5,24 @@ final class InvestmentProjectionViewModel {
     private let calculator: ProjectionCalculator
     private let configuration: ProjectionConfiguration
     private let formatter: ProjectionValueFormatter
+    private let localization: ProjectionLocalization
     private let initialInput: ProjectionInput?
 
     init(
         initialInput: ProjectionInput?,
         configuration: ProjectionConfiguration,
         calculator: ProjectionCalculator,
-        formatter: ProjectionValueFormatter = ProjectionValueFormatter()
+        localization: ProjectionLocalization,
+        formatter: ProjectionValueFormatter? = nil
     ) {
         self.initialInput = initialInput
         self.configuration = configuration
         self.calculator = calculator
-        self.formatter = formatter
+        self.localization = localization
+        self.formatter = formatter ?? ProjectionValueFormatter(
+            locale: localization.locale,
+            currencyCode: localization.currencyCode
+        )
     }
 
     func initialState() -> InvestmentProjectionViewState {
@@ -69,8 +75,8 @@ final class InvestmentProjectionViewModel {
 
     private func makeProjectionInput(from formInput: ProjectionFormInput) -> ProjectionInput {
         ProjectionInput(
-            currentBalance: decimal(from: formInput.currentBalanceText) ?? 0,
-            contributionAmount: decimal(from: formInput.contributionAmountText) ?? 0,
+            currentBalance: formatter.decimal(from: formInput.currentBalanceText) ?? 0,
+            contributionAmount: formatter.decimal(from: formInput.contributionAmountText) ?? 0,
             contributionFrequency: formInput.contributionFrequency,
             investmentYears: Int(formInput.investmentYearsText) ?? 0,
             annualRate: annualRate(from: formInput),
@@ -96,32 +102,30 @@ final class InvestmentProjectionViewModel {
         case let .preset(rate):
             rate
         case .custom:
-            decimal(from: formInput.customAnnualRateText)
+            formatter.decimal(from: formInput.customAnnualRateText)
         }
-    }
-
-    private func decimal(from text: String) -> Decimal? {
-        guard !text.isEmpty else {
-            return nil
-        }
-
-        return Decimal(string: text.replacingOccurrences(of: ",", with: "."))
     }
 
     private func message(for error: Error) -> String {
         guard let error = error as? ProjectionValidationError else {
-            return "Unable to calculate projection."
+            return localization.calculationFallbackMessage
         }
 
         switch error {
         case .negativeCurrentBalance:
-            return "Current balance must be zero or greater."
+            return localization.negativeCurrentBalanceMessage
         case .negativeContributionAmount:
-            return "Contribution must be zero or greater."
+            return localization.negativeContributionAmountMessage
         case let .invalidInvestmentYears(_, allowedRange):
-            return "Years must be between \(allowedRange.lowerBound) and \(allowedRange.upperBound)."
+            return localization.invalidYearsMessage(
+                lowerBound: allowedRange.lowerBound,
+                upperBound: allowedRange.upperBound
+            )
         case let .invalidAnnualRate(_, allowedRange):
-            return "Annual rate must be between \(allowedRange.lowerBound)% and \(allowedRange.upperBound)%."
+            return localization.invalidAnnualRateMessage(
+                lowerBound: allowedRange.lowerBound,
+                upperBound: allowedRange.upperBound
+            )
         case let .invalidConfiguration(message):
             return message
         }

@@ -1,42 +1,50 @@
 import InvestmentProjectionCore
+import Foundation
 import UIKit
 
 public final class InvestmentProjectionViewController: UIViewController {
     private let theme: InvestmentProjectionTheme
+    private let localization: ProjectionLocalization
     private let viewModel: InvestmentProjectionViewModel
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
-    private lazy var inputFormView = ProjectionInputFormView(theme: theme)
-    private lazy var resultSummaryView = ProjectionResultSummaryView(theme: theme)
+    private lazy var inputFormView = ProjectionInputFormView(theme: theme, localization: localization)
+    private lazy var resultSummaryView = ProjectionResultSummaryView(theme: theme, localization: localization)
 
     public init(
         initialInput: ProjectionInput? = nil,
         configuration: ProjectionConfiguration = .default,
         theme: InvestmentProjectionTheme = .default,
+        locale: Locale = .current,
+        currencyCode: String = "EUR",
         calculator: ProjectionCalculator = ProjectionCalculator()
     ) {
         self.theme = theme
+        self.localization = ProjectionLocalization(locale: locale, currencyCode: currencyCode)
         self.viewModel = InvestmentProjectionViewModel(
             initialInput: initialInput,
             configuration: configuration,
-            calculator: calculator
+            calculator: calculator,
+            localization: self.localization
         )
         super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
         self.theme = .default
+        self.localization = ProjectionLocalization(locale: .current)
         self.viewModel = InvestmentProjectionViewModel(
             initialInput: nil,
             configuration: .default,
-            calculator: ProjectionCalculator()
+            calculator: ProjectionCalculator(),
+            localization: self.localization
         )
         super.init(coder: coder)
     }
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Projection"
+        title = localization.navigationTitle
         view.backgroundColor = theme.backgroundColor
         configureLayout()
         bindViews()
@@ -92,14 +100,14 @@ public final class InvestmentProjectionViewController: UIViewController {
         stack.spacing = 8
 
         let titleLabel = UILabel()
-        titleLabel.text = "Investment projection"
+        titleLabel.text = localization.headlineTitle
         titleLabel.font = .preferredFont(forTextStyle: .largeTitle)
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = theme.primaryTextColor
         titleLabel.numberOfLines = 0
 
         let subtitleLabel = UILabel()
-        subtitleLabel.text = "Scenario planning"
+        subtitleLabel.text = localization.headlineSubtitle
         subtitleLabel.font = .preferredFont(forTextStyle: .subheadline)
         subtitleLabel.textColor = theme.secondaryTextColor
 

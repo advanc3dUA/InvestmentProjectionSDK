@@ -2,19 +2,22 @@ import UIKit
 
 final class ProjectionResultSummaryView: UIStackView {
     private let theme: InvestmentProjectionTheme
+    private let localization: ProjectionLocalization
     private let finalBalanceLabel = UILabel()
     private let totalContributionsLabel = UILabel()
     private let totalGrowthLabel = UILabel()
     private let chartView = ProjectionLineChartView()
 
-    init(theme: InvestmentProjectionTheme) {
+    init(theme: InvestmentProjectionTheme, localization: ProjectionLocalization) {
         self.theme = theme
+        self.localization = localization
         super.init(frame: .zero)
         configureView()
     }
 
     required init(coder: NSCoder) {
         self.theme = .default
+        self.localization = ProjectionLocalization(locale: .current)
         super.init(coder: coder)
         configureView()
     }
@@ -50,11 +53,11 @@ final class ProjectionResultSummaryView: UIStackView {
         chartView.theme = theme
         chartView.heightAnchor.constraint(equalToConstant: 180).isActive = true
 
-        addArrangedSubview(makeCaptionLabel("Projected value"))
+        addArrangedSubview(makeCaptionLabel(localization.projectedValueTitle))
         addArrangedSubview(finalBalanceLabel)
         addArrangedSubview(chartView)
-        addArrangedSubview(makeMetricRow(title: "Contributed", label: totalContributionsLabel))
-        addArrangedSubview(makeMetricRow(title: "Growth", label: totalGrowthLabel, valueColor: theme.positiveColor))
+        addArrangedSubview(makeMetricRow(title: localization.contributedTitle, label: totalContributionsLabel))
+        addArrangedSubview(makeMetricRow(title: localization.growthTitle, label: totalGrowthLabel, valueColor: theme.positiveColor))
     }
 
     private func makeMetricRow(

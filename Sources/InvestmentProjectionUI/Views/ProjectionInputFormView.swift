@@ -5,23 +5,46 @@ final class ProjectionInputFormView: UIStackView {
     var onChange: ((ProjectionFormInput) -> Void)?
 
     private let theme: InvestmentProjectionTheme
+    private let localization: ProjectionLocalization
     private let balanceField = UITextField()
     private let contributionField = UITextField()
     private let yearsField = UITextField()
     private let customRateField = UITextField()
     private let validationLabel = UILabel()
-    private let contributionFrequencyControl = UISegmentedControl(items: ["Monthly", "Yearly"])
-    private let ratePresetControl = UISegmentedControl(items: ["2.5%", "5%", "10%", "Custom"])
+    private let contributionFrequencyControl: UISegmentedControl
+    private let ratePresetControl: UISegmentedControl
     private var isApplyingState = false
 
-    init(theme: InvestmentProjectionTheme) {
+    init(theme: InvestmentProjectionTheme, localization: ProjectionLocalization) {
         self.theme = theme
+        self.localization = localization
+        self.contributionFrequencyControl = UISegmentedControl(items: [
+            localization.monthlyTitle,
+            localization.yearlyTitle
+        ])
+        self.ratePresetControl = UISegmentedControl(items: [
+            "2.5%",
+            "5%",
+            "10%",
+            localization.customTitle
+        ])
         super.init(frame: .zero)
         configureView()
     }
 
     required init(coder: NSCoder) {
         self.theme = .default
+        self.localization = ProjectionLocalization(locale: .current)
+        self.contributionFrequencyControl = UISegmentedControl(items: [
+            self.localization.monthlyTitle,
+            self.localization.yearlyTitle
+        ])
+        self.ratePresetControl = UISegmentedControl(items: [
+            "2.5%",
+            "5%",
+            "10%",
+            self.localization.customTitle
+        ])
         super.init(coder: coder)
         configureView()
     }
@@ -53,12 +76,12 @@ final class ProjectionInputFormView: UIStackView {
         layer.borderColor = theme.borderColor.cgColor
         layer.borderWidth = 0.5
 
-        addArrangedSubview(makeTextFieldRow(title: "Current balance", textField: balanceField))
-        addArrangedSubview(makeTextFieldRow(title: "Contribution", textField: contributionField))
-        addArrangedSubview(makeControlRow(title: "Frequency", control: contributionFrequencyControl))
-        addArrangedSubview(makeTextFieldRow(title: "Years", textField: yearsField))
-        addArrangedSubview(makeControlRow(title: "Annual rate", control: ratePresetControl))
-        addArrangedSubview(makeTextFieldRow(title: "Custom rate", textField: customRateField))
+        addArrangedSubview(makeTextFieldRow(title: localization.currentBalanceTitle, textField: balanceField))
+        addArrangedSubview(makeTextFieldRow(title: localization.contributionTitle, textField: contributionField))
+        addArrangedSubview(makeControlRow(title: localization.frequencyTitle, control: contributionFrequencyControl))
+        addArrangedSubview(makeTextFieldRow(title: localization.yearsTitle, textField: yearsField))
+        addArrangedSubview(makeControlRow(title: localization.annualRateTitle, control: ratePresetControl))
+        addArrangedSubview(makeTextFieldRow(title: localization.customRateTitle, textField: customRateField))
         addArrangedSubview(validationLabel)
 
         [balanceField, contributionField, customRateField].forEach {

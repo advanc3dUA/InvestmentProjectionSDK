@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "InvestmentProjectionSDK",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v17)
     ],
@@ -27,7 +28,10 @@ let package = Package(
         ),
         .target(
             name: "InvestmentProjectionUI",
-            dependencies: ["InvestmentProjectionCore"]
+            dependencies: ["InvestmentProjectionCore"],
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "InvestmentProjectionCoreTests",
